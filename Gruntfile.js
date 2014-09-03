@@ -711,8 +711,10 @@ module.exports = function (grunt) {
 
   grunt.registerTask('start', function () {
     var done = this.async();
+    var passenger_path = '/usr/local/bin/passenger';
+    var npm_path = '/Users/Jonatan/.nvm/v0.10.31/bin/npm';
     var current = grunt.config('shipit.options.deployTo') + 'current';
-    grunt.shipit.remote('cd ' + current + ' && /usr/local/lib/node_modules/npm/bin/npm install && passenger stop && passenger start -e production --startup-file=server/app.js --app-type=node', function(err, stdout){
+    grunt.shipit.remote('cd ' + current + ' && '+npm_path+' install --production && ruby -v && '+passenger_path+' stop && '+passenger_path+' start -e production --startup-file=server/app.js --app-type=node', function(err, stdout){
       console.log(stdout);
       done();
     });
