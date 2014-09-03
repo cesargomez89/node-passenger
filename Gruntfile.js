@@ -9,6 +9,7 @@ module.exports = function (grunt) {
     localConfig = {};
   }
 
+  grunt.loadNpmTasks('grunt-shipit');
   // Load grunt tasks automatically, when needed
   require('jit-grunt')(grunt, {
     express: 'grunt-express-server',
@@ -54,6 +55,20 @@ module.exports = function (grunt) {
         url: 'http://localhost:<%= express.options.port %>'
       }
     },
+
+    shipit: {
+      options: {
+        workspace: 'dist',
+        deployTo: '/Users/Jonatan/passenger/public/',
+        repositoryUrl: 'git@github.com:cesargomez89/depoyed-node-passenger.git',
+        ignores: ['.git', 'node_modules'],
+        keepReleases: 2
+      },
+      production: {
+        servers: 'Jonatan@innovation.com'
+      }
+    },
+
     watch: {
       injectJS: {
         files: [
@@ -570,7 +585,7 @@ module.exports = function (grunt) {
           ]
         }
       }
-    },
+    }
   });
 
   // Used for delaying livereload until after server has restarted
@@ -693,4 +708,22 @@ module.exports = function (grunt) {
     'test',
     'build'
   ]);
+
+  grunt.registerTask('start', function () {
+    var done = this.async();
+    var current = grunt.config('shipit.options.deployTo') + 'current';
+    grunt.shipit.remote('cd ' + current + ' && /usr/local/lib/node_modules/npm/bin/npm install && passenger stop && passenger start -e production --startup-file=server/app.js --app-type=node', function(err, stdout){
+      console.log(stdout);
+      done();
+    });
+    
+  });
+
+  /**
+   * Run start task after deployment.
+   */
+
+  grunt.shipit.on('published', function () {
+    grunt.task.run(['start']);
+  });
 };
